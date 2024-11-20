@@ -1,7 +1,48 @@
 var html2canvas : any;
 
 namespace media_ts {
+//
+let mediaRecorder : MediaRecorder;
+export async function startAudioRecorder(){
+    msg("media start");
 
+    const audioElement = document.getElementById('audio');
+    let audioChunks : BlobPart[] = [];
+    
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    mediaRecorder = new MediaRecorder(stream);
+
+    mediaRecorder.ondataavailable = event => {
+        msg("media data");
+        audioChunks.push(event.data);
+    };
+
+    mediaRecorder.onstop = () => {
+        msg("media stopped");
+        const audioBlob = new Blob(audioChunks, { type: 'audio/webm' }); // 'audio/wav'
+        const audioUrl = URL.createObjectURL(audioBlob);
+        // audioElement.src = audioUrl;
+
+        // Save the audio file
+        const downloadLink = document.createElement('a');
+        downloadLink.href = audioUrl;
+        downloadLink.download = 'recorded_audio.webm';   // wav
+        document.body.appendChild(downloadLink);
+        downloadLink.click();
+        document.body.removeChild(downloadLink);
+    };
+
+    mediaRecorder.start();    
+}
+
+export function stopAudioRecorder(){
+    msg("media stop");
+    mediaRecorder.stop();
+}
+    
+
+
+/*
 let audioRecorder : MediaRecorder | null = null;
 
 abstract class Media {
@@ -148,6 +189,7 @@ export async function drawDivToCanvas(div : HTMLDivElement, canvas : HTMLCanvasE
     });
 
 }
+*/
 
 /*
 <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.0.0-rc.5/dist/html2canvas.min.js"></script>
@@ -163,8 +205,6 @@ const record_button = $button({
 });
 
 
-*/
-
 function play(){
     const canvas = $("main-canvas") as HTMLCanvasElement;   // "record-canvas"
     media_ts.startRecord(canvas);
@@ -175,5 +215,7 @@ function play(){
     media_ts.stopRecord();
 
 }
+*/
+
 
 }
