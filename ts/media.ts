@@ -3,6 +3,49 @@ var html2canvas : any;
 namespace media_ts {
 //
 let mediaRecorder : MediaRecorder;
+
+function saveFile(audioUrl : string){
+    const downloadLink = document.createElement('a');
+    downloadLink.href = audioUrl;
+    downloadLink.download = 'recorded_audio.wav';   // webm 
+    document.body.appendChild(downloadLink);
+    downloadLink.click();
+    document.body.removeChild(downloadLink);
+}
+
+export function recordAudio() {
+    navigator.mediaDevices.getUserMedia({ audio: true })
+        .then(stream => {
+            const recorder = new MediaRecorder(stream);
+            const chunks: Blob[] = [];
+
+            recorder.ondataavailable = (event) => {
+                chunks.push(event.data);
+            };
+
+            recorder.onerror = (error) => {
+                console.error('Error occurred during recording:', error);
+                // Handle the error, e.g., display an error message to the user
+            };
+
+            recorder.start(10000); // Record for 10 seconds
+
+            setTimeout(() => {
+                recorder.stop();
+            }, 10000);
+
+            recorder.onstop = () => {
+                const blob = new Blob(chunks, { type: 'audio/webm' });
+                // Process the recorded blob, e.g., download or upload it
+                const audioUrl = URL.createObjectURL(blob);
+                saveFile(audioUrl);
+            };
+        })
+        .catch(error => {
+            console.error('Error accessing microphone:', error);
+        });
+}
+
 export async function startAudioRecorder(){
     msg("media start");
 
@@ -19,17 +62,15 @@ export async function startAudioRecorder(){
 
     mediaRecorder.onstop = () => {
         msg("media stopped");
-        const audioBlob = new Blob(audioChunks, { type: 'audio/webm' }); // 'audio/wav'
+        // const audioBlob = new Blob(audioChunks, { type: 'audio/ogg' }); //'audio/webm' 'audio/wav'
+        const audioBlob = new Blob(audioChunks, { type: "audio/ogg; codecs=opus" });        
         const audioUrl = URL.createObjectURL(audioBlob);
-        // audioElement.src = audioUrl;
+
+        let audioElement = document.getElementById("audio") as HTMLAudioElement;
+        audioElement.src = audioUrl;
 
         // Save the audio file
-        const downloadLink = document.createElement('a');
-        downloadLink.href = audioUrl;
-        downloadLink.download = 'recorded_audio.webm';   // wav
-        document.body.appendChild(downloadLink);
-        downloadLink.click();
-        document.body.removeChild(downloadLink);
+        saveFile(audioUrl);
     };
 
     mediaRecorder.start();    
