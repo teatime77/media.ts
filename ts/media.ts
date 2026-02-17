@@ -1,7 +1,7 @@
+import { msg } from "@i18n";
+
 var html2canvas : any;
 
-namespace media_ts {
-//
 let mediaRecorder : MediaRecorder;
 
 function saveFile(audioUrl : string){
@@ -257,6 +257,3 @@ function play(){
 
 }
 */
-
-
-}
