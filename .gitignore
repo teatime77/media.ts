@@ -1,2 +1,4 @@
 public
 ts/@types
+dist
+tsconfig.tsbuildinfo
