@@ -2,3 +2,4 @@ public
 ts/@types
 dist
 tsconfig.tsbuildinfo
+lib
